@@ -19,7 +19,7 @@ One `control group subsystem` represents one kind of resources like a processor 
 * `freezer` - allows to suspend/resume for a task(s) from a group;
 * `net_cls` - allows to mark network packets from task(s) from a group;
 * `net_prio` - provides a way to dynamically set the priority of network traffic per network interface for a group;
-* `perf_event` - provides access to [perf events](https://en.wikipedia.org/wiki/Perf_(Linux)) to a group;
+* `perf_event` - provides access to [perf events](https://en.wikipedia.org/wiki/Perf_\(Linux\)) to a group;
 * `hugetlb` - activates support for [huge pages](https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt) for a group;
 * `pid` - sets limit to number of processes in a group.
 
@@ -70,7 +70,7 @@ dr-xr-xr-x 5 root root  0 Dec  2 22:37 systemd
 
 As you already may guess that `control groups` mechanism is not such mechanism which was invented only directly to the needs of the Linux kernel, but mostly for userspace needs. To use a `control group`, we should create it at first. We may create a `cgroup` via two ways.
 
-The first way is to create subdirectory in any subsystem from `sys/fs/cgroup` and add a pid of a task to a `tasks` file which will be created automatically right after we will create the subdirectory.
+The first way is to create subdirectory in any subsystem from `/sys/fs/cgroup` and add a pid of a task to a `tasks` file which will be created automatically right after we will create the subdirectory.
 
 The second way is to create/destroy/manage `cgroups` with utils from `libcgroup` library (`libcgroup-tools` in Fedora).
 
@@ -108,7 +108,7 @@ $ cd /sys/fs/cgroup
 And now let's go to the `devices` subdirectory which represents kind of resources that allows or denies access to devices by tasks in a `cgroup`:
 
 ```
-# cd /devices
+# cd devices
 ```
 
 and create `cgroup_test_group` directory there:
@@ -174,7 +174,7 @@ print line
 ./cgroup_test_script.sh: line 5: /dev/tty: Operation not permitted
 ```
 
-Similar situation will be when you will run you [docker](https://en.wikipedia.org/wiki/Docker_(software)) containers for example:
+Similar situation will be when you will run you [docker](https://en.wikipedia.org/wiki/Docker_\(software\)) containers for example:
 
 ```
 ~$ docker ps
@@ -275,7 +275,7 @@ struct cgroup_subsys {
 }
 ```
 
-Where for example `ccs_online` and `ccs_offline` callbacks are called after a cgroup successfully will complete all allocations and a cgroup will be before releasing respectively. The `early_init` flags marks subsystems which may/should be initialized early. The `id` and `name` fields represents unique identifier in the array of registered subsystems for a cgroup and `name` of a subsystem respectively. The last - `root` fields represents pointer to the root of of a cgroup hierarchy.
+Where for example `css_online` and `css_offline` callbacks are called after a cgroup successfully will complete all allocations and a cgroup will be before releasing respectively. The `early_init` flags marks subsystems which may/should be initialized early. The `id` and `name` fields represents unique identifier in the array of registered subsystems for a cgroup and `name` of a subsystem respectively. The last - `root` fields represents pointer to the root of of a cgroup hierarchy.
 
 Of course the `cgroup_subsys` structure bigger and has other fields, but it is enough for now. Now as we got to know important structures related to `cgroups` mechanism, let's return to the `cgroup_init_early` function. Main purpose of this function is to do early initialization of some subsystems. As you already may guess, these `early` subsystems should have `cgroup_subsys->early_init = 1`. Let's look what subsystems may be initialized early.
 
@@ -292,7 +292,7 @@ Here we may see call of the `init_cgroup_root` function which will execute initi
 struct cgroup_root cgrp_dfl_root;
 ```
 
-Its `cgrp` field represented by the `cgroup` structure which represents a `cgroup` as you already may guess and defined in the [include/linux/cgroup-defs.h](https://github.com/torvalds/linux/blob/16f73eb02d7e1765ccab3d2018e0bd98eb93d973/include/linux/cgroup-defs.h) header file. We already know that a process which is represented by the `task_struct` in the Linux kernel. The `task_struct` does not contain direct link to a `cgroup` where this task is attached. But it may be reached via `ccs_set` field of the `task_struct`. This `ccs_set` structure holds pointer to the array of subsystem states:
+Its `cgrp` field represented by the `cgroup` structure which represents a `cgroup` as you already may guess and defined in the [include/linux/cgroup-defs.h](https://github.com/torvalds/linux/blob/16f73eb02d7e1765ccab3d2018e0bd98eb93d973/include/linux/cgroup-defs.h) header file. We already know that a process which is represented by the `task_struct` in the Linux kernel. The `task_struct` does not contain direct link to a `cgroup` where this task is attached. But it may be reached via `css_set` field of the `task_struct`. This `css_set` structure holds pointer to the array of subsystem states:
 
 ```C
 struct css_set {
@@ -358,7 +358,7 @@ So, the overall picture of `cgroups` related data structure is following:
 
 
 
-So, the `init_cgroup_root` fills the `cgrp_dfl_root` with the default values. The next thing is assigning initial `ccs_set` to the `init_task` which represents first process in the system:
+So, the `init_cgroup_root` fills the `cgrp_dfl_root` with the default values. The next thing is assigning initial `css_set` to the `init_task` which represents first process in the system:
 
 ```C
 RCU_INIT_POINTER(init_task.cgroups, &init_css_set);
@@ -444,6 +444,6 @@ Links
 * [cgroups kernel documentation](https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt)
 * [cgroups v2](https://www.kernel.org/doc/Documentation/cgroup-v2.txt)
 * [bash](https://www.gnu.org/software/bash/)
-* [docker](https://en.wikipedia.org/wiki/Docker_(software))
-* [perf events](https://en.wikipedia.org/wiki/Perf_(Linux))
+* [docker](https://en.wikipedia.org/wiki/Docker_\(software\))
+* [perf events](https://en.wikipedia.org/wiki/Perf_\(Linux\))
 * [Previous chapter](https://0xax.gitbooks.io/linux-insides/content/MM/linux-mm-1.html)
